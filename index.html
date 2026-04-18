@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Roof Age Report — Sligh from Stronghold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --navy:#0f2540;
+    --navy-2:#142c4a;
+    --red:#c8102e;
+    --red-2:#a30d25;
+    --gold:#f3b23a;
+    --cream:#f6f1e7;
+    --sand:#efe7d4;
+    --ink:#0c1a2e;
+    --muted:#5b6677;
+    --line:#e3dccb;
+    --ok:#1f8a4c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--cream);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  .display{font-family:'Oswald',sans-serif;letter-spacing:.01em}
+  .serif{font-family:'Fraunces',serif}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:16px}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:6px;padding:16px 24px;font-weight:700;font-size:16px;text-decoration:none;transition:transform .08s ease, box-shadow .15s, background .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-red{background:var(--red);color:#fff;box-shadow:0 6px 18px rgba(200,16,46,.28)}
+  .btn-red:hover{background:var(--red-2)}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-ghost{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+  .badge-row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .stars{color:#f3b23a;letter-spacing:2px}
+  /* tweaks panel */
+  .tweaks{position:fixed;right:18px;bottom:18px;background:#0f2540;color:#fff;border-radius:12px;padding:14px 16px;z-index:9999;box-shadow:0 18px 40px rgba(0,0,0,.35);min-width:240px;display:none;font-family:'Inter',sans-serif}
+  .tweaks.on{display:block}
+  .tweaks h4{margin:0 0 10px 0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#f3b23a}
+  .tweaks .opt{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+  .tweaks .opt:hover{background:rgba(255,255,255,.08)}
+  .tweaks .opt input{accent-color:#f3b23a}
+  /* form fields */
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .field input,.field select,.field textarea{padding:14px 14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s, box-shadow .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(15,37,64,.12)}
+  .err{color:var(--red);font-size:12px;margin-top:2px}
+  /* shared chips */
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy)}
+  .pill-red{display:inline-flex;align-items:center;gap:8px;background:rgba(200,16,46,.1);color:var(--red);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .pill-navy{display:inline-flex;align-items:center;gap:8px;background:rgba(15,37,64,.08);color:var(--navy);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .ribbon{display:inline-block;background:var(--gold);color:var(--navy);padding:6px 14px;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;border-radius:4px}
+  /* progress bar */
+  .progress{height:6px;background:#e8dfca;border-radius:99px;overflow:hidden}
+  .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .35s ease}
+  /* generic card */
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}
+  /* hide-on-mobile helper */
+  @media(max-width:780px){
+    .hide-sm{display:none!important}
+  }
+  .quiz-opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;transition:border-color .15s, transform .08s, box-shadow .15s;text-align:left;width:100%;font-size:15px;font-weight:600;color:var(--ink)}
+  .quiz-opt:hover{border-color:var(--navy);box-shadow:0 4px 14px rgba(15,37,64,.07)}
+  .quiz-opt.sel{border-color:var(--red);background:#fff7f8;box-shadow:0 0 0 3px rgba(200,16,46,.1)}
+  .quiz-opt .dot{width:18px;height:18px;border-radius:50%;border:2px solid #cfc6b1;flex:0 0 auto}
+  .quiz-opt.sel .dot{background:var(--red);border-color:var(--red);box-shadow:inset 0 0 0 3px #fff}
+  .stat{display:flex;flex-direction:column;gap:4px}
+  .stat .n{font-family:'Oswald';font-size:34px;color:var(--navy)}
+  .stat .l{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .divider{height:1px;background:var(--line);margin:32px 0}
+  .footer{background:var(--navy);color:#cfd8e6;padding:36px 0;font-size:13px}
+  .footer a{color:#fff;text-decoration:none}
+  /* subtle roof pattern */
+  .roof-bg{
+    background-image:
+      linear-gradient(135deg, rgba(15,37,64,.94), rgba(15,37,64,.94)),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'><path d='M0 30 L15 0 L30 30 L45 0 L60 30 Z' fill='none' stroke='%23ffffff' stroke-opacity='0.08' stroke-width='1.2'/></svg>");
+    background-size:auto, 60px 30px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Tweaks panel -->
+<div class="tweaks" id="tweaks">
+  <h4>Variation</h4>
+  <label class="opt"><input type="radio" name="variant" value="classic"><span>① Classic Stronghold</span></label>
+  <label class="opt"><input type="radio" name="variant" value="personal"><span>② Personal / Neighbor</span></label>
+  <label class="opt"><input type="radio" name="variant" value="bold"><span>③ Bold Closer</span></label>
+  <div style="height:8px"></div>
+  <h4>Lead form</h4>
+  <label class="opt"><input type="checkbox" id="t-mock"><span>Show mock submissions in console</span></label>
+</div>
+
+<script>
+  // Tweaks defaults — host can rewrite this block on disk.
+  window.TWEAKS = /*EDITMODE-BEGIN*/{
+    "variant": "classic",
+    "mockOnly": true
+  }/*EDITMODE-END*/;
+
+  // Edit-mode wiring
+  (function(){
+    const panel = document.getElementById('tweaks');
+    function sync(){
+      panel.querySelectorAll('input[name=variant]').forEach(r=>{ r.checked = (r.value === window.TWEAKS.variant); });
+      document.getElementById('t-mock').checked = !!window.TWEAKS.mockOnly;
+    }
+    function setKey(k,v){
+      window.TWEAKS[k]=v;
+      window.dispatchEvent(new CustomEvent('tweakschange'));
+      try{ window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[k]:v}},'*'); }catch(e){}
+    }
+    panel.addEventListener('change', e=>{
+      if(e.target.name==='variant') setKey('variant', e.target.value);
+      if(e.target.id==='t-mock') setKey('mockOnly', e.target.checked);
+    });
+    window.addEventListener('message', e=>{
+      const d=e.data||{};
+      if(d.type==='__activate_edit_mode'){ panel.classList.add('on'); sync(); }
+      if(d.type==='__deactivate_edit_mode'){ panel.classList.remove('on'); }
+    });
+    sync();
+    try{ window.parent.postMessage({type:'__edit_mode_available'},'*'); }catch(e){}
+  })();
+</script>
+
+<script type="text/babel" data-presets="env,react">
+
+const { useState, useEffect, useMemo, useRef } = React;
+
+const SLIGH = {
+  name: "Sligh Hartley",
+  title: "Roofing Consultant • Stronghold Roofing",
+  phone: "863-701-3586",
+  phoneHref: "tel:8637013586",
+  email: "sligh@strongholdroofing.com",
+  photo: "assets/sligh.jpg"
+};
+
+// Live tweaks hook
+function useTweaks() {
+  const [v, setV] = useState({ ...window.TWEAKS });
+  useEffect(() => {
+    const f = () => setV({ ...window.TWEAKS });
+    window.addEventListener('tweakschange', f);
+    return () => window.removeEventListener('tweakschange', f);
+  }, []);
+  return v;
+}
+
+/* ---------- Shared subcomponents ---------- */
+
+function Stars({ n = 5 }) {return <span className="stars" aria-label={`${n} of 5 stars`}>{'★'.repeat(n)}</span>;}
+
+function TrustBadges() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px,1fr))', gap: 18, alignItems: 'center' }}>
+      {[
+      { t: 'Google Guaranteed', s: 'Vetted & Backed' },
+      { t: 'GAF Master Elite®', s: "Top 2% of US contractors" },
+      { t: "President's Club", s: '2-Star Award' },
+      { t: 'Licensed & Insured', s: 'CCC#1331909' },
+      { t: 'Top Rated', s: 'HomeAdvisor Elite' }].
+      map((b, i) =>
+      <div key={i} className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Oswald', fontSize: 14, letterSpacing: '.06em', color: 'var(--navy)' }}>{b.t}</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)' }}>{b.s}</div>
+        </div>
+      )}
+    </div>);
+
+}
+
+function Testimonials() {
+  const items = [
+  { n: 'Renee Hutchinson', t: "They sealed my leak before booking even closed. Photos before, during, and after. Sligh kept me in the loop the whole time." },
+  { n: 'Ed Flood', t: "New architectural shingle roof — excellent job. Very professional, all of our concerns were addressed." },
+  { n: 'Val Morgan', t: "I rarely give reviews. They are terrific to work with — kept me updated through every step." }];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px,1fr))', gap: 18 }}>
+      {items.map((r, i) =>
+      <div key={i} className="card">
+          <Stars />
+          <p style={{ margin: '12px 0 14px 0', fontSize: 15, lineHeight: 1.55, color: '#1f2a3d' }}>"{r.t}"</p>
+          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--navy)' }}>{r.n}</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Verified Google review</div>
+        </div>
+      )}
+    </div>);
+
+}
+
+function ServiceArea() {
+  const counties = [
+  { n: 'Polk County', cities: ['Lakeland', 'Bartow', 'Winter Haven', 'Auburndale', 'Haines City', 'Lake Wales'] },
+  { n: 'Hillsborough County', cities: ['Tampa', 'Brandon', 'Riverview', 'Plant City', 'Valrico', 'Lutz'] },
+  { n: 'Sarasota County', cities: ['Sarasota', 'Fruitville', 'Bee Ridge', 'Sarasota Springs'] }];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px,1fr))', gap: 20 }}>
+      {counties.map((c, i) =>
+      <div key={i}>
+          <div style={{ fontFamily: 'Oswald', fontSize: 18, color: 'var(--navy)', marginBottom: 8 }}>{c.n}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {c.cities.map((x, j) => <span key={j} className="chip">{x}</span>)}
+          </div>
+        </div>
+      )}
+    </div>);
+
+}
+
+/* ---------- Education ---------- */
+const AGE_BRACKETS = [
+{ min: 0, max: 7, label: 'Like New', color: '#1f8a4c', tip: "Plenty of life left. Annual inspections keep your warranty intact." },
+{ min: 8, max: 11, label: '(mostly) Middle Age', color: '#2b6cb0', tip: "Watch for granule loss & sealant wear. Get an inspection every 1–2 years." },
+{ min: 12, max: 14, label: 'Approaching End-of-Life', color: '#e08a1f', tip: "Insurance carriers in FL are getting strict. Time to plan and budget." },
+{ min: 15, max: 200, label: 'Insurance nightmare', color: '#c8102e', tip: "Most FL insurers will non-renew at 15+ yrs for shingle. Let's get ahead of it." }];
+
+function bracketFor(age) {return AGE_BRACKETS.find((b) => age >= b.min && age <= b.max) || AGE_BRACKETS[0];}
+
+function Education() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: 14 }}>
+      {AGE_BRACKETS.map((b, i) =>
+      <div key={i} className="card" style={{ borderTop: `4px solid ${b.color}` }}>
+          <div style={{ fontFamily: 'Oswald', fontSize: 14, letterSpacing: '.06em', color: b.color }}>{b.min}–{b.max > 100 ? '15+' : b.max} years</div>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 22, fontWeight: 700, margin: '4px 0 8px 0', color: 'var(--navy)' }}>{b.label}</div>
+          <div style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--muted)' }}>{b.tip}</div>
+        </div>
+      )}
+    </div>);
+
+}
+
+/* ---------- Lead capture flow ---------- */
+
+function buildMailto(data) {
+  const subject = encodeURIComponent(`New Roof Age Report request — ${data.name || '(no name)'}`);
+  const lines = [
+  `Name: ${data.name || ''}`,
+  `Phone: ${data.phone || ''}`,
+  `Email: ${data.email || ''}`,
+  `Address: ${data.address || ''}`,
+  '',
+  '— Roof details —',
+  `Install year (best guess): ${data.year || ''}`,
+  `Material: ${data.material || ''}`,
+  `Visible signs: ${(data.signs || []).join(', ')}`,
+  `Last inspection: ${data.lastInspect || ''}`,
+  `Goal: ${data.goal || ''}`,
+  `Notes: ${data.notes || ''}`,
+  '',
+  `Submitted ${new Date().toLocaleString()}`];
+
+  return `mailto:${SLIGH.email}?subject=${subject}&body=${encodeURIComponent(lines.join('\n'))}`;
+}
+
+function LeadGate({ onUnlock, variant }) {
+  const [d, setD] = useState({ name: '', phone: '', email: '' });
+  const [err, setErr] = useState({});
+  function set(k, v) {setD((p) => ({ ...p, [k]: v }));setErr((p) => ({ ...p, [k]: undefined }));}
+  function submit(e) {
+    e.preventDefault();
+    const next = {};
+    if (!d.name.trim()) next.name = "Please enter your name";
+    if (!/^[\d\s().+\-]{7,}$/.test(d.phone)) next.phone = "Phone looks off";
+    if (!/^\S+@\S+\.\S+$/.test(d.email)) next.email = "Email looks off";
+    setErr(next);
+    if (Object.keys(next).length) return;
+    onUnlock(d);
+  }
+  const accent = variant === 'bold' ? 'var(--red)' : 'var(--navy)';
+  return (
+    <form onSubmit={submit} className="card" style={{ padding: '28px', borderTop: `5px solid ${accent}`, boxShadow: '0 24px 60px rgba(15,37,64,.12)' }}>
+      <div className="pill-red" style={{ marginBottom: 10 }}>Step 1 of 2</div>
+      <h3 style={{ margin: '0 0 6px 0', fontFamily: 'Fraunces', fontSize: 26, color: 'var(--navy)' }}>Start your free Roof Age Report</h3>
+      <p style={{ margin: '0 0 18px 0', color: 'var(--muted)', fontSize: 14 }}>I'll send your custom report within 24 hours. No spam — just my honest take.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
+        <div className="field">
+          <label>Full name</label>
+          <input value={d.name} onChange={(e) => set('name', e.target.value)} placeholder="Jane Homeowner" />
+          {err.name && <div className="err">{err.name}</div>}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="field">
+            <label>Phone</label>
+            <input value={d.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(863) 555-0123" inputMode="tel" />
+            {err.phone && <div className="err">{err.phone}</div>}
+          </div>
+          <div className="field">
+            <label>Email</label>
+            <input value={d.email} onChange={(e) => set('email', e.target.value)} placeholder="you@email.com" inputMode="email" />
+            {err.email && <div className="err">{err.email}</div>}
+          </div>
+        </div>
+      </div>
+      <button type="submit" className="btn btn-red" style={{ marginTop: 18, width: '100%' }}>
+        Continue → Roof Quiz
+      </button>
+      <div style={{ marginTop: 12, fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>
+        🔒 Your info goes straight to Sligh. Never sold, never shared.
+      </div>
+    </form>);
+
+}
+
+/* ---------- Quiz ---------- */
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTS = (() => {const y = [];for (let i = CURRENT_YEAR; i >= CURRENT_YEAR - 50; i--) y.push(i);y.push('Not sure');return y;})();
+const MATERIALS = ['Asphalt shingle', 'Architectural shingle', 'Metal', 'Tile', 'Flat / TPO', 'Not sure'];
+const SIGNS = ['Granules in gutters', 'Curling/missing shingles', 'Stains on ceiling', 'Daylight in attic', 'Moss/algae streaks', 'None visible'];
+const INSPECT = ['Within last year', '1–3 years ago', '3+ years ago', 'Never'];
+const GOALS = ['Just curious', 'Insurance is asking', 'Buying/selling soon', 'I think I have a leak', 'Planning to replace this year'];
+
+function Quiz({ lead, onSubmit }) {
+  const [step, setStep] = useState(0);
+  const [d, setD] = useState({ year: '', material: '', signs: [], lastInspect: '', goal: '' });
+  const steps = [
+  { key: 'year', q: "What year was your roof installed?", sub: "A best guess is fine — closing docs or your insurance policy usually have it.", type: 'select', opts: YEAR_OPTS },
+  { key: 'material', q: "What kind of roof do you have?", type: 'cards', opts: MATERIALS },
+  { key: 'signs', q: "Seeing any of these?", sub: "Pick all that apply.", type: 'multi', opts: SIGNS },
+  { key: 'lastInspect', q: "When was the last professional inspection?", type: 'cards', opts: INSPECT },
+  { key: 'goal', q: "What's prompting you to look right now?", type: 'cards', opts: GOALS }];
+
+  const cur = steps[step];
+  function set(v) {
+    if (cur.type === 'multi') {
+      const has = d[cur.key].includes(v);
+      const next = has ? d[cur.key].filter((x) => x !== v) : [...d[cur.key], v];
+      setD((p) => ({ ...p, [cur.key]: next }));
+    } else {
+      setD((p) => ({ ...p, [cur.key]: v }));
+    }
+  }
+  const valid = cur.type === 'multi' ? d[cur.key].length > 0 : !!d[cur.key];
+  function next() {
+    if (step < steps.length - 1) setStep(step + 1);else
+    onSubmit(d);
+  }
+  const pct = step / steps.length * 100;
+
+  return (
+    <div className="card" style={{ padding: '28px', boxShadow: '0 24px 60px rgba(15,37,64,.12)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div className="pill-navy">Step 2 of 2 · Question {step + 1}/{steps.length}</div>
+        <div style={{ fontSize: 12, color: 'var(--muted)' }}>👋 Hey {lead.name.split(' ')[0]}</div>
+      </div>
+      <div className="progress" style={{ marginBottom: 22 }}><span style={{ width: `${pct + (valid ? 100 / steps.length : 0) * 0.0}%` }} /></div>
+
+      <h3 style={{ margin: '0 0 6px 0', fontFamily: 'Fraunces', fontSize: 26, color: 'var(--navy)' }}>{cur.q}</h3>
+      {cur.sub && <p style={{ margin: '0 0 18px 0', color: 'var(--muted)', fontSize: 14 }}>{cur.sub}</p>}
+
+      {cur.type === 'select' &&
+      <div className="field">
+          <label>Install year</label>
+          <select value={d[cur.key]} onChange={(e) => set(e.target.value)}>
+            <option value="">Pick a year…</option>
+            {cur.opts.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </div>
+      }
+
+      {(cur.type === 'cards' || cur.type === 'multi') &&
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px,1fr))', gap: 10 }}>
+          {cur.opts.map((o) => {
+          const sel = cur.type === 'multi' ? d[cur.key].includes(o) : d[cur.key] === o;
+          return (
+            <button key={o} type="button" className={`quiz-opt ${sel ? 'sel' : ''}`} onClick={() => set(o)}>
+                <span className="dot" />
+                <span>{o}</span>
+              </button>);
+
+        })}
+        </div>
+      }
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24, gap: 10 }}>
+        <button type="button" className="btn btn-ghost" onClick={() => step > 0 && setStep(step - 1)} disabled={step === 0} style={{ opacity: step === 0 ? .4 : 1 }}>← Back</button>
+        <button type="button" className="btn btn-red" disabled={!valid} onClick={next} style={{ opacity: valid ? 1 : .5 }}>
+          {step === steps.length - 1 ? 'Submit & Unlock Report →' : 'Next →'}
+        </button>
+      </div>
+    </div>);
+
+}
+
+/* ---------- Confirmation ---------- */
+function Confirmation({ all }) {
+  const yr = parseInt(all.year, 10);
+  const age = isNaN(yr) ? null : Math.max(0, CURRENT_YEAR - yr);
+  const b = age == null ? null : bracketFor(age);
+  return (
+    <div className="card" style={{ padding: '32px', textAlign: 'center', boxShadow: '0 24px 60px rgba(15,37,64,.12)' }}>
+      <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#e6f4ec', color: 'var(--ok)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', fontSize: 32 }}>✓</div>
+      <h3 style={{ fontFamily: 'Fraunces', fontSize: 30, color: 'var(--navy)', margin: '0 0 6px 0' }}>Got it, {all.name.split(' ')[0]}!</h3>
+      <p style={{ color: 'var(--muted)', margin: '0 0 22px 0', maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>
+        Your full Roof Age Report is on its way. I personally review every submission and will get back to you within <strong style={{ color: 'var(--ink)' }}>24 hours</strong> at <strong style={{ color: 'var(--ink)' }}>{all.phone}</strong> or <strong style={{ color: 'var(--ink)' }}>{all.email}</strong>.
+      </p>
+
+      {b &&
+      <div style={{ borderTop: `4px solid ${b.color}`, background: '#fffaf0', borderRadius: 10, padding: '18px 20px', textAlign: 'left', maxWidth: 520, margin: '0 auto' }}>
+          <div style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 4 }}>Quick preview</div>
+          <div style={{ fontFamily: 'Oswald', fontSize: 34, color: b.color, lineHeight: 1 }}>{age} years old</div>
+          <div style={{ fontFamily: 'Fraunces', fontWeight: 700, fontSize: 20, color: 'var(--navy)', marginTop: 4 }}>{b.label}</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>{b.tip}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, fontStyle: 'italic' }}>Sligh will confirm with the full inspection-grade report.</div>
+        </div>
+      }
+
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
+        <a className="btn btn-red" href={SLIGH.phoneHref}>📞 Call Sligh now: {SLIGH.phone}</a>
+        <a className="btn btn-ghost" href={`sms:8637013586`}>💬 Text me</a>
+      </div>
+    </div>);
+
+}
+
+/* ---------- Master flow widget ---------- */
+
+function ReportFlow({ variant }) {
+  const [stage, setStage] = useState('lead'); // lead → quiz → done
+  const [lead, setLead] = useState(null);
+  const [final, setFinal] = useState(null);
+  const ref = useRef(null);
+
+  function unlock(d) {setLead(d);setStage('quiz');setTimeout(() => ref.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 50);}
+  function submitQuiz(d) {
+    const all = { ...lead, ...d };
+    setFinal(all);
+    if (window.TWEAKS?.mockOnly) {
+      console.log('[Roof Age Report submission]', all);
+    } else {
+      window.location.href = buildMailto(all);
+    }
+    setStage('done');
+    setTimeout(() => ref.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  return (
+    <div ref={ref}>
+      {stage === 'lead' && <LeadGate onUnlock={unlock} variant={variant} />}
+      {stage === 'quiz' && <Quiz lead={lead} onSubmit={submitQuiz} />}
+      {stage === 'done' && <Confirmation all={final} />}
+    </div>);
+
+}
+
+/* =====================================================================
+   VARIATION 1 — CLASSIC STRONGHOLD
+   Navy hero, red accents, structured & professional
+   ===================================================================== */
+function VariantClassic() {
+  return (
+    <>
+      {/* nav */}
+      <header style={{ background: '#fff', borderBottom: '1px solid var(--line)' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 38, height: 38, background: 'var(--navy)', color: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Oswald', fontWeight: 700 }}>S</div>
+            <div>
+              <div style={{ fontFamily: 'Oswald', fontSize: 16, letterSpacing: '.04em', color: 'var(--navy)', lineHeight: 1 }}>SLIGH HARTLEY</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Stronghold Roofing</div>
+            </div>
+          </div>
+          <a href={SLIGH.phoneHref} className="btn btn-red hide-sm" style={{ padding: '10px 18px', fontSize: 14 }}>📞 {SLIGH.phone}</a>
+        </div>
+      </header>
+
+      {/* hero */}
+      <section className="roof-bg" style={{ color: '#fff', padding: '72px 0 80px' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.2fr .9fr', gap: 48, alignItems: 'center' }}>
+          <div>
+            <span className="ribbon">FREE • 24-HR TURNAROUND</span>
+            <h1 className="display" style={{ fontSize: 'clamp(36px,5vw,60px)', lineHeight: 1.05, margin: '18px 0 16px 0', textTransform: 'uppercase', letterSpacing: '.01em' }}>
+              How old is your roof, <span style={{ color: 'var(--gold)' }}>really?</span>
+            </h1>
+            <p style={{ fontSize: 18, lineHeight: 1.55, color: '#dfe7f3', maxWidth: 520, marginBottom: 26 }}>
+              Get a personalized Roof Age Report from Sligh Hartley. I'll review your details and send back a straight answer — no pressure, no sales pitch, just facts about your Florida roof.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <a href="#report" className="btn btn-red">Get my free report →</a>
+              <a href={SLIGH.phoneHref} className="btn" style={{ background: 'rgba(255,255,255,.1)', border: '1.5px solid rgba(255,255,255,.3)', color: "rgb(253, 248, 248)" }}>Or call {SLIGH.phone}</a>
+            </div>
+            <div style={{ display: 'flex', gap: 24, marginTop: 32 }}>
+              <div className="stat"><div className="n" style={{ color: '#fff' }}>500+</div><div className="l" style={{ color: '#9eb1cc' }}>Florida roofs</div></div>
+              <div className="stat"><div className="n" style={{ color: '#fff' }}>4.9★</div><div className="l" style={{ color: '#9eb1cc' }}>Google rating</div></div>
+              <div className="stat"><div className="n" style={{ color: '#fff' }}>24h</div><div className="l" style={{ color: '#9eb1cc' }}>Response time</div></div>
+            </div>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div style={{ aspectRatio: '4/5', background: '#fff', borderRadius: 14, overflow: 'hidden', border: '4px solid var(--gold)', boxShadow: '0 30px 60px rgba(0,0,0,.4)' }}>
+              <img src={SLIGH.photo} alt="Sligh Hartley" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ position: 'absolute', bottom: -18, left: -18, background: '#fff', color: 'var(--navy)', padding: '14px 18px', borderRadius: 10, boxShadow: '0 12px 30px rgba(0,0,0,.25)', maxWidth: 240 }}>
+              <div style={{ fontFamily: 'Oswald', fontSize: 18 }}>Sligh Hartley</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>Your direct line to a trusted roofer.</div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
+                <Stars /><span style={{ fontSize: 12, color: 'var(--muted)' }}>Verified rep</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* report flow */}
+      <section id="report" style={{ padding: '64px 0', background: 'var(--cream)' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+          <div>
+            <span className="pill-red">Step-by-step</span>
+            <h2 className="serif" style={{ fontSize: 42, margin: '12px 0 14px 0', color: 'var(--navy)', lineHeight: 1.1, fontWeight: 700 }}>Your Roof Age Report — built by a human, not an algorithm.</h2>
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: 'var(--muted)', marginBottom: 24 }}>
+              Tell me a few things about your home. I'll personally review your answers, cross-reference with what we see across Polk, Hillsborough &amp; Sarasota counties, and email you back within 24 hours with:
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {['Estimated remaining roof life', 'Insurance & re-roof timing window', 'What to watch for between now and next storm season', 'Honest pricing range — no high-pressure quotes'].map((x, i) =>
+              <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15 }}>
+                  <span style={{ flex: '0 0 auto', width: 24, height: 24, borderRadius: '50%', background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, marginTop: 1 }}>✓</span>
+                  <span>{x}</span>
+                </li>
+              )}
+            </ul>
+          </div>
+          <ReportFlow variant="classic" />
+        </div>
+      </section>
+
+      {/* education */}
+      <section style={{ padding: '64px 0', background: '#fff' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <span className="pill-navy">What your roof age means</span>
+            <h2 className="serif" style={{ fontSize: 36, margin: '10px 0 8px 0', color: 'var(--navy)' }}>Florida roofs don't age like fine wine.</h2>
+            <p style={{ color: 'var(--muted)', maxWidth: 600, margin: '0 auto' }}>Sun, hurricanes, and humidity compress the lifespan. Here's where most homeowners land:</p>
+          </div>
+          <Education />
+        </div>
+      </section>
+
+      {/* trust */}
+      <section style={{ padding: '56px 0', background: 'var(--sand)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h3 className="display" style={{ fontSize: 14, letterSpacing: '.2em', color: 'var(--muted)', textTransform: 'uppercase', margin: 0 }}>Backed by Stronghold's credentials</h3>
+          </div>
+          <TrustBadges />
+        </div>
+      </section>
+
+      {/* reviews */}
+      <section style={{ padding: '64px 0', background: '#fff' }}>
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+            <h2 className="serif" style={{ fontSize: 32, margin: 0, color: 'var(--navy)' }}>Neighbors say it best.</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Stars /><strong>4.9</strong><span style={{ color: 'var(--muted)', fontSize: 14 }}>· 500+ Google reviews</span></div>
+          </div>
+          <Testimonials />
+        </div>
+      </section>
+
+      {/* service area */}
+      <section style={{ padding: '56px 0', background: 'var(--cream)' }}>
+        <div className="container">
+          <h2 className="serif" style={{ fontSize: 28, color: 'var(--navy)', margin: '0 0 18px 0' }}>Where I work</h2>
+          <ServiceArea />
+        </div>
+      </section>
+
+      <Footer />
+    </>);
+
+}
+
+/* =====================================================================
+   VARIATION 2 — PERSONAL / NEIGHBOR
+   Cream warm, Sligh-forward, conversational
+   ===================================================================== */
+function VariantPersonal() {
+  return (
+    <>
+      <header style={{ background: 'var(--cream)', borderBottom: '1px solid var(--line)' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src={SLIGH.photo} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold)' }} />
+            <div>
+              <div style={{ fontFamily: 'Fraunces', fontSize: 18, fontWeight: 700, color: 'var(--navy)', lineHeight: 1 }}>Sligh from Stronghold</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '.05em' }}>Your neighborhood roofer · Lakeland, FL</div>
+            </div>
+          </div>
+          <a href={SLIGH.phoneHref} className="btn hide-sm" style={{ background: 'var(--navy)', color: '#fff', padding: '10px 18px', fontSize: 14 }}>Text or call: {SLIGH.phone}</a>
+        </div>
+      </header>
+
+      {/* hero — letter style */}
+      <section style={{ padding: '80px 0 60px', background: 'var(--cream)', position: 'relative', overflow: 'hidden' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: '.85fr 1.15fr', gap: 56, alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{ aspectRatio: '1/1', background: '#fff', borderRadius: '50%', overflow: 'hidden', border: '8px solid #fff', boxShadow: '0 20px 50px rgba(15,37,64,.18)' }}>
+              <img src={SLIGH.photo} alt="Sligh Hartley" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ position: 'absolute', top: -16, right: -12, background: 'var(--gold)', color: 'var(--navy)', padding: '10px 14px', borderRadius: 8, fontFamily: 'Oswald', fontSize: 13, letterSpacing: '.08em', transform: 'rotate(8deg)', boxShadow: '0 8px 18px rgba(0,0,0,.15)' }}>
+              SAY HI 👋
+            </div>
+          </div>
+          <div>
+            <div style={{ fontFamily: 'Fraunces', fontStyle: 'italic', color: 'var(--red)', fontSize: 18, marginBottom: 8 }}>Hey neighbor —</div>
+            <h1 className="serif" style={{ fontSize: 'clamp(38px,4.6vw,56px)', lineHeight: 1.08, margin: '0 0 18px 0', color: 'var(--navy)', fontWeight: 700 }}>
+              Wondering how much life your roof has left?
+            </h1>
+            <p style={{ fontSize: 18, lineHeight: 1.6, color: '#34425a', marginBottom: 18, maxWidth: 560 }}>
+              I'm Sligh Hartley with Stronghold Roofing. The most common question I get isn't about price — it's <em>"how old is my roof, and when do I have to deal with it?"</em>
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.6, color: '#34425a', marginBottom: 26, maxWidth: 560 }}>
+              So I built this. Tell me a few things, I'll get you a real, human answer within 24 hours. No robo-quotes, no high-pressure visit — just neighborly honesty.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <a href="#report" className="btn btn-red">Start my Roof Age Report</a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Stars /><span style={{ fontSize: 13, color: 'var(--muted)' }}>500+ Florida homeowners trust Stronghold</span>
+              </div>
+            </div>
+            <div style={{ marginTop: 30, paddingTop: 20, borderTop: '1px dashed var(--line)', fontFamily: 'Fraunces', fontStyle: 'italic', color: 'var(--muted)', fontSize: 15 }}>
+              — Sligh
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* report */}
+      <section id="report" style={{ padding: '56px 0', background: '#fff' }}>
+        <div className="container" style={{ maxWidth: 680 }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <span className="pill-red">Free · No Obligation</span>
+            <h2 className="serif" style={{ fontSize: 36, color: 'var(--navy)', margin: '10px 0 6px 0' }}>Let's get you an answer.</h2>
+            <p style={{ color: 'var(--muted)', margin: 0 }}>Two short steps. About 90 seconds.</p>
+          </div>
+          <ReportFlow variant="personal" />
+        </div>
+      </section>
+
+      <section style={{ padding: '56px 0', background: 'var(--sand)' }}>
+        <div className="container">
+          <h2 className="serif" style={{ fontSize: 30, color: 'var(--navy)', margin: '0 0 6px 0', textAlign: 'center' }}>What your roof age really means in Florida</h2>
+          <p style={{ color: 'var(--muted)', textAlign: 'center', marginBottom: 28 }}>The honest version, not the scare-tactic version.</p>
+          <Education />
+        </div>
+      </section>
+
+      <section style={{ padding: '56px 0', background: '#fff' }}>
+        <div className="container">
+          <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
+            <Stars />
+            <h2 className="serif" style={{ fontSize: 28, color: 'var(--navy)', margin: 0 }}>Folks I've helped</h2>
+          </div>
+          <Testimonials />
+        </div>
+      </section>
+
+      <section style={{ padding: '48px 0', background: 'var(--cream)' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 36, alignItems: 'center' }}>
+          <div>
+            <h3 className="serif" style={{ fontSize: 24, color: 'var(--navy)', margin: '0 0 8px 0' }}>I cover all of Polk, Hillsborough &amp; Sarasota counties.</h3>
+            <p style={{ color: 'var(--muted)', margin: '0 0 16px 0' }}>If you're in Central or Southwest Florida, you're in my area.</p>
+            <ServiceArea />
+          </div>
+          <div className="card" style={{ padding: 24, background: '#fff' }}>
+            <div style={{ fontFamily: 'Oswald', fontSize: 14, letterSpacing: '.1em', color: 'var(--muted)', textTransform: 'uppercase' }}>Direct line</div>
+            <a href={SLIGH.phoneHref} style={{ fontFamily: 'Oswald', fontSize: 34, color: 'var(--red)', textDecoration: 'none', display: 'block', margin: '4px 0 12px 0' }}>{SLIGH.phone}</a>
+            <a href={`mailto:${SLIGH.email}`} style={{ color: 'var(--navy)', textDecoration: 'none', fontWeight: 600, display: 'block', marginBottom: 18 }}>{SLIGH.email}</a>
+            <TrustBadges />
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </>);
+
+}
+
+/* =====================================================================
+   VARIATION 3 — BOLD CLOSER
+   High-contrast, urgency-friendly, conversion-first
+   ===================================================================== */
+function VariantBold() {
+  return (
+    <>
+      <header style={{ background: 'var(--navy)', color: '#fff' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 36, height: 36, background: 'var(--red)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Oswald', fontWeight: 700 }}>S</div>
+            <div style={{ fontFamily: 'Oswald', fontSize: 15, letterSpacing: '.06em' }}>SLIGH HARTLEY · STRONGHOLD</div>
+          </div>
+          <a href={SLIGH.phoneHref} className="btn btn-red hide-sm" style={{ padding: '8px 16px', fontSize: 14 }}>{SLIGH.phone}</a>
+        </div>
+      </header>
+
+      <section style={{ background: 'var(--ink)', color: '#fff', padding: '56px 0 24px', position: 'relative', overflow: 'hidden' }}>
+        <div className="container bold-hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.15fr .85fr', gap: 48, alignItems: 'center' }}>
+          <div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', animation: 'pulse 1.6s infinite' }} />
+              <span style={{ fontFamily: 'Oswald', fontSize: 13, letterSpacing: '.18em', color: 'var(--gold)' }}>FLORIDA HOMEOWNERS — READ THIS</span>
+            </div>
+            <h1 className="display" style={{ fontSize: 'clamp(34px,4.4vw,56px)', lineHeight: 1, textTransform: 'uppercase', margin: '0 0 18px 0', letterSpacing: '-.005em', wordBreak: 'break-word' }}>
+              Don't let your <span style={{ color: 'var(--red)' }}>insurance company</span> tell you about your roof first.
+            </h1>
+            <p style={{ fontSize: 18, lineHeight: 1.55, color: '#cfd8e6', marginBottom: 24, maxWidth: 520 }}>
+              Florida insurers are non-renewing roofs at 15 years. Get my free Roof Age Report and know <strong style={{ color: '#fff' }}>before they do</strong>. I respond personally within 24 hours.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+              <a href="#report" className="btn btn-red" style={{ padding: '18px 28px', fontSize: 17 }}>Get my free report →</a>
+              <a href={SLIGH.phoneHref} className="btn" style={{ background: 'transparent', color: '#fff', border: '2px solid #fff', padding: '16px 24px' }}>📞 {SLIGH.phone}</a>
+            </div>
+            <div style={{ fontSize: 13, color: '#9eb1cc' }}>⚡ Avg response time today: <strong style={{ color: '#fff' }}>under 4 hours</strong></div>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div style={{ aspectRatio: '4/5', borderRadius: 14, overflow: 'hidden', border: '4px solid var(--red)', boxShadow: '0 30px 80px rgba(200,16,46,.35)', maxWidth: '100%' }}>
+              <img src={SLIGH.photo} alt="Sligh Hartley" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ position: 'absolute', bottom: -14, right: -14, background: '#fff', color: 'var(--navy)', padding: '12px 16px', borderRadius: 8, fontFamily: 'Oswald', fontSize: 14, letterSpacing: '.06em', transform: 'rotate(-3deg)' }}>
+              ASK FOR SLIGH
+            </div>
+          </div>
+        </div>
+        <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}} @media(max-width:980px){.bold-hero-grid{grid-template-columns:1fr!important}}`}</style>
+      </section>
+
+      {/* stat strip */}
+      <section style={{ background: 'var(--red)', color: '#fff', padding: '18px 0' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px,1fr))', gap: 18, textAlign: 'center' }}>
+          <div><strong style={{ fontFamily: 'Oswald', fontSize: 28 }}>15 yrs</strong><div style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .85 }}>FL insurance cutoff</div></div>
+          <div><strong style={{ fontFamily: 'Oswald', fontSize: 28 }}>500+</strong><div style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .85 }}>Florida roofs done</div></div>
+          <div><strong style={{ fontFamily: 'Oswald', fontSize: 28 }}>4.9★</strong><div style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .85 }}>Google rated</div></div>
+          <div><strong style={{ fontFamily: 'Oswald', fontSize: 28 }}>24 hr</strong><div style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .85 }}>Personal response</div></div>
+        </div>
+      </section>
+
+      <section id="report" style={{ padding: '72px 0', background: 'var(--cream)' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 48, alignItems: 'start' }}>
+          <div>
+            <span className="pill-red">Step-by-step</span>
+            <h2 className="display" style={{ fontSize: 46, color: 'var(--navy)', textTransform: 'uppercase', lineHeight: 1.05, margin: '14px 0 16px 0' }}>Two steps. Real answer. Zero pressure.</h2>
+            <ol style={{ paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {[
+              ['Drop your contact', 'So I can get back to you with the report'],
+              ["Answer 5 quick questions", "Year, material, what you're seeing"],
+              ['I do the work', "Within 24 hours you get a real assessment from a real human"]].
+              map(([t, s], i) =>
+              <li key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <div style={{ flex: '0 0 auto', width: 42, height: 42, borderRadius: '50%', background: 'var(--navy)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Oswald', fontSize: 20 }}>{i + 1}</div>
+                  <div>
+                    <div style={{ fontFamily: 'Oswald', fontSize: 18, color: 'var(--navy)', textTransform: 'uppercase' }}>{t}</div>
+                    <div style={{ color: 'var(--muted)', fontSize: 14 }}>{s}</div>
+                  </div>
+                </li>
+              )}
+            </ol>
+            <div style={{ marginTop: 28, padding: 18, background: 'var(--navy)', color: '#fff', borderRadius: 10 }}>
+              <div style={{ fontFamily: 'Oswald', fontSize: 14, letterSpacing: '.1em', color: 'var(--gold)' }}>WHY ME?</div>
+              <p style={{ margin: '4px 0 0 0', fontSize: 15, lineHeight: 1.55 }}>I'm not a call-center. Stronghold leads come straight to my phone. Whether you replace tomorrow or in 5 years, I want you to make the call with full information.</p>
+            </div>
+          </div>
+          <ReportFlow variant="bold" />
+        </div>
+      </section>
+
+      <section style={{ padding: '56px 0', background: '#fff' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="display" style={{ fontSize: 34, color: 'var(--navy)', textTransform: 'uppercase', margin: '0 0 6px 0' }}>What your number means</h2>
+            <p style={{ color: 'var(--muted)', margin: 0 }}>The brackets I'll use when scoring your report.</p>
+          </div>
+          <Education />
+        </div>
+      </section>
+
+      <section style={{ padding: '56px 0', background: 'var(--sand)' }}>
+        <div className="container">
+          <h3 className="display" style={{ textAlign: 'center', fontSize: 14, letterSpacing: '.2em', color: 'var(--muted)', textTransform: 'uppercase', margin: '0 0 20px 0' }}>Backed by Stronghold</h3>
+          <TrustBadges />
+          <div style={{ height: 36 }} />
+          <Testimonials />
+        </div>
+      </section>
+
+      <section style={{ padding: '48px 0', background: 'var(--ink)', color: '#fff' }}>
+        <div className="container">
+          <h3 className="display" style={{ fontSize: 22, letterSpacing: '.05em', color: '#fff', margin: '0 0 18px 0', textTransform: 'uppercase' }}>Where I work</h3>
+          <ServiceArea />
+        </div>
+      </section>
+
+      <Footer dark />
+    </>);
+
+}
+
+function Footer({ dark }) {
+  return (
+    <footer className="footer" style={dark ? { background: '#070f1d' } : {}}>
+      <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'center' }}>
+        <div>
+          <div style={{ fontFamily: 'Oswald', fontSize: 18, color: '#fff', letterSpacing: '.06em' }}>SLIGH HARTLEY</div>
+          <div style={{ fontSize: 12, opacity: .7, marginTop: 4 }}>Stronghold Roofing · Lakeland, FL · CCC#1331909</div>
+        </div>
+        <div style={{ textAlign: 'right', fontSize: 13, opacity: .85 }}>
+          <a href={SLIGH.phoneHref}>{SLIGH.phone}</a>{' · '}<a href={`mailto:${SLIGH.email}`}>{SLIGH.email}</a>
+        </div>
+      </div>
+    </footer>);
+
+}
+
+/* ---------- Root ---------- */
+function App() {
+  const t = useTweaks();
+  const V = t.variant === 'personal' ? VariantPersonal : t.variant === 'bold' ? VariantBold : VariantClassic;
+  return <V />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
